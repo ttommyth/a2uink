@@ -2,7 +2,7 @@ import React from "react";
 import { Box, render, Text, useInput, useStdout } from "ink";
 import type { Key } from "ink";
 import type { ActionDef, A2uiServerMessage, A2uiUserAction, BoundValue, ComponentDef, DataModelEntry, RendererOptions, ResolvedNode } from "./types.js";
-import { resolveBoundValue } from "./binding.js";
+import { resolveBoundValue, setBoundValue } from "./binding.js";
 import { FocusProvider, useFocusRegistry } from "./focus.js";
 import { buildResolvedTree } from "./tree.js";
 import { renderNode } from "./catalog.js";
@@ -25,6 +25,15 @@ export function createA2uiInkRenderer(options: RendererOptions = {}): A2uiInkRen
   const surfaces = new Map<string, SurfaceState>();
   let inkInstance: ReturnType<typeof render> | null = null;
 
+  const updateLocalDataModel = (surfaceId: string, path: string, value: unknown, node: ResolvedNode) => {
+    const surface = surfaces.get(surfaceId);
+    if (!surface) {
+      return;
+    }
+    surface.dataModel = setBoundValue(path, surface.dataModel, node.bindingContext, value);
+    renderSurfaces();
+  };
+
   const ensureSurface = (surfaceId: string): SurfaceState => {
     const existing = surfaces.get(surfaceId);
     if (existing) {
@@ -45,7 +54,8 @@ export function createA2uiInkRenderer(options: RendererOptions = {}): A2uiInkRen
 
     const element = React.createElement(A2uiRoot, {
       surface: surface ?? null,
-      onUserAction: options.onUserAction
+      onUserAction: options.onUserAction,
+      onLocalDataModelUpdate: updateLocalDataModel
     });
 
     if (!inkInstance) {
@@ -128,7 +138,8 @@ export function createA2uiInkRenderer(options: RendererOptions = {}): A2uiInkRen
 const A2uiRoot: React.FC<{
   surface: SurfaceState | null;
   onUserAction?: (action: A2uiUserAction) => void;
-}> = ({ surface, onUserAction }) => {
+  onLocalDataModelUpdate?: (surfaceId: string, path: string, value: unknown, node: ResolvedNode) => void;
+}> = ({ surface, onUserAction, onLocalDataModelUpdate }) => {
   if (!surface || !surface.rootComponentId) {
     return React.createElement(Text, null, "No surface");
   }
@@ -149,7 +160,8 @@ const A2uiRoot: React.FC<{
         surfaceId: surface.surfaceId,
         tree,
         dataModel: surface.dataModel,
-        onUserAction
+        onUserAction,
+        onLocalDataModelUpdate
       })
     )
   );
@@ -187,7 +199,8 @@ const RenderTree: React.FC<{
   tree: ResolvedNode;
   dataModel: Record<string, unknown>;
   onUserAction?: (action: A2uiUserAction) => void;
-}> = ({ surfaceId, tree, dataModel, onUserAction }) => {
+  onLocalDataModelUpdate?: (surfaceId: string, path: string, value: unknown, node: ResolvedNode) => void;
+}> = ({ surfaceId, tree, dataModel, onUserAction, onLocalDataModelUpdate }) => {
   const dispatchAction = (action: ActionDef, node: ResolvedNode, value?: unknown) => {
     const context = {
       ...resolveActionContext(action.context, dataModel, node.bindingContext),
@@ -205,7 +218,11 @@ const RenderTree: React.FC<{
     });
   };
 
-  return renderNode(tree, { dispatchAction });
+  const updateLocalDataModel = (path: string, value: unknown, node: ResolvedNode) => {
+    onLocalDataModelUpdate?.(surfaceId, path, value, node);
+  };
+
+  return renderNode(tree, { dispatchAction, updateLocalDataModel });
 };
 
 function resolveActionContext(
@@ -279,14 +296,6 @@ function normalizeComponentDef(component: unknown): ComponentDef | null {
         normalizedProps.onPress = normalizeAction(normalizedProps.action);
         delete normalizedProps.action;
       }
-      if (
-        normalizedProps.action &&
-        !normalizedProps.onChange &&
-        (record.type === "Input" || record.type === "TextField" || record.type === "DateTimeInput")
-      ) {
-        normalizedProps.onChange = normalizeAction(normalizedProps.action);
-        delete normalizedProps.action;
-      }
       if (normalizedProps.action && !normalizedProps.onChange && (record.type === "Checkbox" || record.type === "CheckBox")) {
         normalizedProps.onChange = normalizeAction(normalizedProps.action);
         delete normalizedProps.action;
@@ -356,11 +365,6 @@ function normalizeComponentShape(type: string, props: Record<string, unknown>) {
 
   if (nextProps.action && !nextProps.onPress && type === "Button") {
     nextProps.onPress = normalizeAction(nextProps.action);
-    delete nextProps.action;
-  }
-
-  if (nextProps.action && !nextProps.onChange && (type === "Input" || type === "TextField" || type === "DateTimeInput")) {
-    nextProps.onChange = normalizeAction(nextProps.action);
     delete nextProps.action;
   }
 
@@ -439,7 +443,8 @@ function normalizeComponentShape(type: string, props: Record<string, unknown>) {
         label: nextProps.label,
         value: textValue,
         placeholder: nextProps.placeholder ?? resolveLiteralString(nextProps.label),
-        onChange: nextProps.onChange ?? normalizeAction(nextProps.action)
+        onChange: nextProps.onChange,
+        onSubmit: nextProps.onSubmit
       },
       children: undefined
     };

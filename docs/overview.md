@@ -147,8 +147,10 @@ Below is a pragmatic reference for the supported props and actions.
 
 ### Input
 - Props: `value`
+- Optional props: `debounceMs` (number, defaults to 500 when `onChange` is set)
 - Actions: `onChange`, `onSubmit`
 - Keys: text input, Backspace/Delete, Enter.
+- Behavior: when `value` is bound to a path, the client updates the local data model on every keystroke. `onChange` only fires when explicitly provided (use it for live search or server-side validation).
 
 ### Select
 - Props: `items`, `selectedIndex`

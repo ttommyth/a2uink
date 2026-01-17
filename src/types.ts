@@ -103,6 +103,7 @@ export interface ResolvedNode {
   id: string;
   type: string;
   props: Record<string, unknown>;
+  boundProps?: Record<string, BoundValue>;
   children: ResolvedNode[];
   instanceKey: string;
   bindingContext?: BindingContext;

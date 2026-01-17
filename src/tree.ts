@@ -1,5 +1,5 @@
 import type { BindingContext, ComponentDef, ResolvedNode } from "./types.js";
-import { resolveBoundValue, resolveProps } from "./binding.js";
+import { resolveBoundValue, resolvePropsWithBindings } from "./binding.js";
 
 export function buildResolvedTree(
   components: Record<string, ComponentDef>,
@@ -21,7 +21,7 @@ function buildNode(
   context: BindingContext | undefined,
   instanceKey: string
 ): ResolvedNode {
-  const props = resolveProps(component.props ?? {}, dataModel, context);
+  const { props, boundProps } = resolvePropsWithBindings(component.props ?? {}, dataModel, context);
   const children: ResolvedNode[] = [];
 
   if (component.children?.explicitList) {
@@ -55,6 +55,7 @@ function buildNode(
     id: component.id,
     type: component.type,
     props,
+    boundProps,
     children,
     instanceKey,
     bindingContext: context

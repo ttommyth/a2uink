@@ -44,15 +44,26 @@ export function resolveProps(
   dataModel: Record<string, unknown>,
   context?: BindingContext
 ): Record<string, unknown> {
+  return resolvePropsWithBindings(props, dataModel, context).props;
+}
+
+export function resolvePropsWithBindings(
+  props: Record<string, unknown>,
+  dataModel: Record<string, unknown>,
+  context?: BindingContext
+): { props: Record<string, unknown>; boundProps: Record<string, BoundValue> } {
   const resolved: Record<string, unknown> = {};
+  const boundProps: Record<string, BoundValue> = {};
   for (const [key, value] of Object.entries(props)) {
     if (isBoundValue(value)) {
-      resolved[key] = resolveBoundValue(value as BoundValue, dataModel, context);
+      const boundValue = value as BoundValue;
+      resolved[key] = resolveBoundValue(boundValue, dataModel, context);
+      boundProps[key] = boundValue;
     } else {
       resolved[key] = value;
     }
   }
-  return resolved;
+  return { props: resolved, boundProps };
 }
 
 function isBoundValue(value: unknown): value is BoundValue {
@@ -137,4 +148,44 @@ function resolveContextRoot(
   }
 
   return dataModel;
+}
+
+export function setBoundValue(
+  path: string,
+  dataModel: Record<string, unknown>,
+  context: BindingContext | undefined,
+  value: unknown
+): Record<string, unknown> {
+  const normalized = normalizePath(path);
+  if (!normalized) {
+    if (isPlainObject(value)) {
+      return { ...dataModel, ...value };
+    }
+    return dataModel;
+  }
+
+  const parts = normalized.split(".");
+  const root = resolveContextRoot(parts[0], context, dataModel);
+  const startIndex = root === dataModel ? 0 : 1;
+  setPathValueFromParts(root, parts, startIndex, value);
+  return dataModel;
+}
+
+function setPathValueFromParts(root: unknown, parts: string[], startIndex: number, value: unknown): void {
+  if (!root || typeof root !== "object") {
+    return;
+  }
+  let current = root as Record<string, unknown>;
+  for (let i = startIndex; i < parts.length - 1; i += 1) {
+    const key = parts[i];
+    if (!current[key] || typeof current[key] !== "object") {
+      current[key] = {};
+    }
+    current = current[key] as Record<string, unknown>;
+  }
+  current[parts[parts.length - 1]] = value;
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
 }

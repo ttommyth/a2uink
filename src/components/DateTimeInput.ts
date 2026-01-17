@@ -16,6 +16,9 @@ export const A2uiDateTimeInput: React.FC<{ node: ResolvedNode; options: CatalogR
   const nodeRef = useRef(node);
   const dispatchRef = useRef(options.dispatchAction);
   const handlerRef = useRef<(input: string, key: Key) => void>(() => undefined);
+  const valuePathRef = useRef<string | undefined>((node.boundProps?.value as { path?: string } | undefined)?.path);
+  const debounceMsRef = useRef<number>(resolveDebounceMs(node.props.debounceMs));
+  const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showCursor, setShowCursor] = useState(true);
 
   useEffect(() => {
@@ -30,6 +33,8 @@ export const A2uiDateTimeInput: React.FC<{ node: ResolvedNode; options: CatalogR
 
   useEffect(() => {
     nodeRef.current = node;
+    valuePathRef.current = (node.boundProps?.value as { path?: string } | undefined)?.path;
+    debounceMsRef.current = resolveDebounceMs(node.props.debounceMs);
   }, [node]);
 
   useEffect(() => {
@@ -37,9 +42,31 @@ export const A2uiDateTimeInput: React.FC<{ node: ResolvedNode; options: CatalogR
   }, [options.dispatchAction]);
 
   useEffect(() => {
+    const scheduleChange = (next: string) => {
+      if (!action) {
+        return;
+      }
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+      const debounceMs = debounceMsRef.current;
+      if (!debounceMs) {
+        dispatchRef.current(action, nodeRef.current, next);
+        return;
+      }
+      debounceTimeoutRef.current = setTimeout(() => {
+        dispatchRef.current(action, nodeRef.current, next);
+        debounceTimeoutRef.current = null;
+      }, debounceMs);
+    };
+
     handlerRef.current = (input: string, key: Key) => {
       const currentValue = valueRef.current;
       if (key.return) {
+        if (debounceTimeoutRef.current) {
+          clearTimeout(debounceTimeoutRef.current);
+          debounceTimeoutRef.current = null;
+        }
         if (submitAction) {
           dispatchRef.current(submitAction, nodeRef.current, currentValue);
         }
@@ -49,21 +76,33 @@ export const A2uiDateTimeInput: React.FC<{ node: ResolvedNode; options: CatalogR
       if (key.backspace || key.delete) {
         const next = currentValue.slice(0, -1);
         setValue(next);
-        if (action) {
-          dispatchRef.current(action, nodeRef.current, next);
+        if (valuePathRef.current && options.updateLocalDataModel) {
+          options.updateLocalDataModel(valuePathRef.current, next, nodeRef.current);
         }
+        scheduleChange(next);
         return;
       }
 
       if (input) {
         const next = `${currentValue}${input}`;
         setValue(next);
-        if (action) {
-          dispatchRef.current(action, nodeRef.current, next);
+        if (valuePathRef.current && options.updateLocalDataModel) {
+          options.updateLocalDataModel(valuePathRef.current, next, nodeRef.current);
         }
+        scheduleChange(next);
       }
     };
   }, [action, submitAction]);
+
+  useEffect(
+    () => () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+        debounceTimeoutRef.current = null;
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     const handler = (input: string, key: Key) => handlerRef.current(input, key);
@@ -105,3 +144,14 @@ export const A2uiDateTimeInput: React.FC<{ node: ResolvedNode; options: CatalogR
     )
   );
 };
+
+function resolveDebounceMs(value: unknown): number {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.max(0, value);
+  }
+  const parsed = typeof value === "string" ? Number(value) : Number.NaN;
+  if (Number.isFinite(parsed)) {
+    return Math.max(0, parsed);
+  }
+  return 500;
+}
