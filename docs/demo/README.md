@@ -26,6 +26,12 @@ npm run build
 npm run preview
 ```
 
+Run the TypeScript typecheck:
+
+```bash
+npm run typecheck
+```
+
 ## Structure
 
 ```
@@ -49,19 +55,24 @@ docs/demo/
 ## Customization
 
 ### Adding New Components
+
 1. Add a new section in `src/App.tsx` following the existing pattern
 2. Update the example JSON in `src/App.tsx`
 3. Update the navigation in the sidebar
 
 ### Simple Input Mode
+
 The playground includes a **Simple Mode** toggle that lets users paste:
+
 - A components array (no surface metadata)
 - A separate dataModel object
 
 The demo uses a fixed surface ID (`demo`) and root component ID (`root`) in this mode.
 
 ### Theming
+
 Edit the CSS variables in `src/styles.css`:
+
 ```css
 :root {
   --bg-primary: #1a1a2e;
@@ -73,6 +84,7 @@ Edit the CSS variables in `src/styles.css`:
 ## Browser Support
 
 Works in all modern browsers that support:
+
 - ES6+ JavaScript
 - CSS Grid & Flexbox
 - WebGL (for xterm.js performance)
