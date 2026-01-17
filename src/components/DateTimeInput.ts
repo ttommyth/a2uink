@@ -5,7 +5,7 @@ import type { ActionDef, ResolvedNode } from "../types.js";
 import type { CatalogRenderOptions } from "./types.js";
 import { useFocusRegistry } from "../focus.js";
 
-export const A2uiInput: React.FC<{ node: ResolvedNode; options: CatalogRenderOptions }> = ({ node, options }) => {
+export const A2uiDateTimeInput: React.FC<{ node: ResolvedNode; options: CatalogRenderOptions }> = ({ node, options }) => {
   const focus = useFocusRegistry();
   const { register, unregister } = focus;
   const action = node.props.onChange as ActionDef | undefined;
@@ -88,11 +88,20 @@ export const A2uiInput: React.FC<{ node: ResolvedNode; options: CatalogRenderOpt
   const cursor = isFocused && showCursor ? "▌" : " ";
   const focusPrefix = isFocused ? "▶ " : "  ";
   const label = node.props.label as string | undefined;
+  const placeholder = node.props.placeholder as string | undefined;
 
   return React.createElement(
     Box,
     { flexDirection: "column" },
     label ? React.createElement(Text, { dimColor: true }, label) : null,
-    React.createElement(Text, { color: isFocused ? "cyan" : undefined }, `${focusPrefix}${displayValue}${cursor}`)
+    React.createElement(
+      Box,
+      null,
+      React.createElement(
+        Text,
+        { color: isFocused ? "cyan" : undefined },
+        `${focusPrefix}${displayValue}${cursor}${placeholder && !value ? ` (${placeholder})` : ""}`
+      )
+    )
   );
 };

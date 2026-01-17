@@ -1,7 +1,7 @@
 import process from "process";
 
 if (!process.cwd) {
-  process.cwd = () => "/";
+	process.cwd = () => "/";
 }
 
 export const cwd = () => process.cwd();

@@ -46,6 +46,8 @@ safeHandleMessage({
           "rootSpacer3",
           "contentSection",
           "rootSpacer4",
+          "extraSection",
+          "rootSpacer5",
           "submit"
         ]
       }
@@ -198,6 +200,89 @@ safeHandleMessage({
       type: "Spacer"
     },
     {
+      id: "extraSection",
+      type: "Box",
+      props: { direction: "column", borderStyle: "single", paddingX: 1, paddingY: 0 },
+      children: {
+        explicitList: [
+          "textFieldLabel",
+          "textField",
+          "choiceLabel",
+          "multipleChoice",
+          "sliderLabel",
+          "slider",
+          "dateTime",
+          "mediaLabel",
+          "image"
+        ]
+      }
+    },
+    {
+      id: "textFieldLabel",
+      type: "Text",
+      props: { text: "TextField" }
+    },
+    {
+      id: "textField",
+      type: "TextField",
+      props: {
+        label: "Email",
+        value: { path: "form.email" },
+        onChange: { actionId: "emailChange" }
+      }
+    },
+    {
+      id: "choiceLabel",
+      type: "Text",
+      props: { text: "MultipleChoice" }
+    },
+    {
+      id: "multipleChoice",
+      type: "MultipleChoice",
+      props: {
+        label: "Meal",
+        items: [
+          { label: "Pizza", value: "pizza" },
+          { label: "Sushi", value: "sushi" },
+          { label: "Salad", value: "salad" }
+        ],
+        onSelect: { actionId: "mealSelect" }
+      }
+    },
+    {
+      id: "sliderLabel",
+      type: "Text",
+      props: { text: "Slider" }
+    },
+    {
+      id: "slider",
+      type: "Slider",
+      props: { min: 1, max: 5, step: 1, value: { path: "form.priority" }, onChange: { actionId: "priorityChange" } }
+    },
+    {
+      id: "dateTime",
+      type: "DateTimeInput",
+      props: {
+        label: "Pickup",
+        value: { path: "form.pickupTime" },
+        onChange: { actionId: "pickupChange" }
+      }
+    },
+    {
+      id: "mediaLabel",
+      type: "Text",
+      props: { text: "Media" }
+    },
+    {
+      id: "image",
+      type: "Image",
+      props: { label: "Menu", url: "https://example.com/menu.png" }
+    },
+    {
+      id: "rootSpacer5",
+      type: "Spacer"
+    },
+    {
       id: "submit",
       type: "Button",
       props: {
@@ -213,7 +298,7 @@ safeHandleMessage({
   surfaceId,
   dataModel: {
     title: "A2UI Ink Demo",
-    form: { name: "" },
+    form: { name: "", email: "", priority: 3, pickupTime: "2026-01-17 18:30" },
     flags: { enabled: false },
     radioOptions: ["Low", "Medium", "High"],
     selectedRadio: 1,

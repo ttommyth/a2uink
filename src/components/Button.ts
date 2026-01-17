@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Box, Text } from "ink";
+import { Text } from "ink";
 import type { Key } from "ink";
 import type { ActionDef, ResolvedNode } from "../types.js";
 import type { CatalogRenderOptions } from "./types.js";
@@ -8,8 +8,9 @@ import { useFocusRegistry } from "../focus.js";
 export const A2uiButton: React.FC<{ node: ResolvedNode; options: CatalogRenderOptions }> = ({ node, options }) => {
   const focus = useFocusRegistry();
   const { register, unregister } = focus;
-  const label = (node.props.label ?? node.props.text ?? "Button") as string;
-  const action = node.props.onPress as ActionDef | undefined;
+  const label =
+    resolveLabel(node.props.label ?? node.props.text) ?? resolveLabelFromChildren(node.children) ?? "Button";
+  const action = (node.props.onPress ?? node.props.action) as ActionDef | undefined;
   const isFocused = focus.isFocused(node.instanceKey);
   const focusPrefix = isFocused ? "▶ " : "  ";
   const nodeRef = useRef(node);
@@ -41,9 +42,43 @@ export const A2uiButton: React.FC<{ node: ResolvedNode; options: CatalogRenderOp
     return () => unregister(node.instanceKey);
   }, [register, unregister, node.instanceKey]);
 
-  return React.createElement(
-    Box,
-    { borderStyle: "round", borderColor: isFocused ? "cyan" : "gray", paddingX: 1 },
-    React.createElement(Text, { inverse: isFocused, bold: true }, `${focusPrefix}${label}`)
-  );
+  return React.createElement(Text, { inverse: isFocused, bold: true }, `${focusPrefix}${label}`);
 };
+
+function resolveLabel(value: unknown): string | undefined {
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    if (typeof record.literalString === "string") {
+      return record.literalString;
+    }
+    if (typeof record.text === "string") {
+      return record.text;
+    }
+    if (record.text && typeof record.text === "object") {
+      const textRecord = record.text as Record<string, unknown>;
+      if (typeof textRecord.literalString === "string") {
+        return textRecord.literalString;
+      }
+      if (typeof textRecord.text === "string") {
+        return textRecord.text;
+      }
+    }
+    if (typeof record.label === "string") {
+      return record.label;
+    }
+  }
+
+  return undefined;
+}
+
+function resolveLabelFromChildren(children: ResolvedNode[]): string | undefined {
+  const textChild = children.find((child) => child.type === "Text" && child.props?.text !== undefined);
+  if (!textChild) {
+    return undefined;
+  }
+  return resolveLabel(textChild.props.text);
+}

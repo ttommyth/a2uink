@@ -65,7 +65,7 @@ export const A2uiTabs: React.FC<{ node: ResolvedNode; options: CatalogRenderOpti
 
   return React.createElement(
     Box,
-    { flexDirection: "column", borderStyle: "single", borderColor: isFocused ? "cyan" : "gray", paddingX: 1 },
+    { flexDirection: "column" },
     React.createElement(
       Box,
       { flexDirection: "row" },

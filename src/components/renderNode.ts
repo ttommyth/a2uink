@@ -12,6 +12,11 @@ import { A2uiRadioGroup } from "./RadioGroup.js";
 import { A2uiList } from "./List.js";
 import { A2uiTabs } from "./Tabs.js";
 import { A2uiTable } from "./Table.js";
+import { A2uiSlider } from "./Slider.js";
+import { A2uiDateTimeInput } from "./DateTimeInput.js";
+import { A2uiModal } from "./Modal.js";
+import { A2uiImage } from "./Image.js";
+import { A2uiDivider } from "./Divider.js";
 import { Spacer } from "ink";
 
 export function renderNode(node: ResolvedNode, options: Omit<CatalogRenderOptions, "renderNode">): React.ReactElement {
@@ -33,9 +38,13 @@ export function renderNode(node: ResolvedNode, options: Omit<CatalogRenderOption
       return React.createElement(Spacer, { key: node.instanceKey });
     case "Input":
       return React.createElement(A2uiInput, { key: node.instanceKey, node, options: optionsWithRender });
+    case "TextField":
+      return React.createElement(A2uiInput, { key: node.instanceKey, node, options: optionsWithRender });
     case "Button":
       return React.createElement(A2uiButton, { key: node.instanceKey, node, options: optionsWithRender });
     case "Select":
+      return React.createElement(A2uiSelect, { key: node.instanceKey, node, options: optionsWithRender });
+    case "MultipleChoice":
       return React.createElement(A2uiSelect, { key: node.instanceKey, node, options: optionsWithRender });
     case "Checkbox":
       return React.createElement(A2uiCheckbox, { key: node.instanceKey, node, options: optionsWithRender });
@@ -47,6 +56,20 @@ export function renderNode(node: ResolvedNode, options: Omit<CatalogRenderOption
       return React.createElement(A2uiTabs, { key: node.instanceKey, node, options: optionsWithRender });
     case "Table":
       return React.createElement(A2uiTable, { key: node.instanceKey, node });
+    case "Divider":
+      return React.createElement(A2uiDivider, { key: node.instanceKey, node });
+    case "Slider":
+      return React.createElement(A2uiSlider, { key: node.instanceKey, node, options: optionsWithRender });
+    case "DateTimeInput":
+      return React.createElement(A2uiDateTimeInput, { key: node.instanceKey, node, options: optionsWithRender });
+    case "Modal":
+      return React.createElement(
+        A2uiModal,
+        { key: node.instanceKey, node },
+        node.children.map((child: ResolvedNode) => renderNode(child, options))
+      );
+    case "Image":
+      return React.createElement(A2uiImage, { key: node.instanceKey, node });
     default:
       return React.createElement(Text, { key: node.instanceKey, dimColor: true }, `Unsupported: ${node.type}`);
   }

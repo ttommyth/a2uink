@@ -73,14 +73,21 @@ export const A2uiSelect: React.FC<{ node: ResolvedNode; options: CatalogRenderOp
   const isFocused = focus.isFocused(node.instanceKey);
   const labels = useMemo(() => items.map(getItemLabel), [items]);
 
+  const label = node.props.label as string | undefined;
+
   return React.createElement(
     Box,
-    { flexDirection: "column", borderStyle: "single", borderColor: isFocused ? "cyan" : "gray", paddingX: 1 },
-    labels.map((label, itemIndex) =>
-      React.createElement(
-        Text,
-        { key: `${node.instanceKey}_${itemIndex}`, inverse: isFocused && itemIndex === index },
-        `${isFocused && itemIndex === index ? "▶ " : "  "}${label}`
+    { flexDirection: "column" },
+    label ? React.createElement(Text, { dimColor: true }, label) : null,
+    React.createElement(
+      Box,
+      { flexDirection: "column" },
+      labels.map((itemLabel, itemIndex) =>
+        React.createElement(
+          Text,
+          { key: `${node.instanceKey}_${itemIndex}`, inverse: isFocused && itemIndex === index },
+          `${isFocused && itemIndex === index ? "▶ " : "  "}${itemLabel}`
+        )
       )
     )
   );

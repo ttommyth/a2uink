@@ -6,7 +6,7 @@ A Vite-powered demo page and integration guide for the A2UI Ink library.
 
 - **Component Catalog**: Browse all available components with examples and prop documentation
 - **Interactive Terminal**: Web-based terminal preview using xterm.js
-- **JSON Playground**: Paste your A2UI JSON and see it rendered in real-time
+- **JSON Playground**: Paste your A2UI JSON and see it rendered in real-time (full or simple mode)
 - **Integration Guide**: Step-by-step instructions for getting started
 
 ## Running Locally
@@ -34,9 +34,10 @@ docs/demo/
 ├── vite.config.js    # Vite configuration (Node polyfills)
 ├── package.json      # Demo dependencies and scripts
 ├── src/
-│   ├── main.js        # App logic + Ink/xterm bridge
+│   ├── App.tsx        # Demo UI + playground
+│   ├── main.tsx       # React entrypoint
 │   └── styles.css     # Styling
-└── README.md         # This file
+└── README.md          # This file
 ```
 
 ## Dependencies
@@ -48,9 +49,16 @@ docs/demo/
 ## Customization
 
 ### Adding New Components
-1. Add a new section in `index.html` following the existing pattern
-2. Update the example JSON in `src/main.js`
+1. Add a new section in `src/App.tsx` following the existing pattern
+2. Update the example JSON in `src/App.tsx`
 3. Update the navigation in the sidebar
+
+### Simple Input Mode
+The playground includes a **Simple Mode** toggle that lets users paste:
+- A components array (no surface metadata)
+- A separate dataModel object
+
+The demo uses a fixed surface ID (`demo`) and root component ID (`root`) in this mode.
 
 ### Theming
 Edit the CSS variables in `src/styles.css`:

@@ -36,7 +36,8 @@ function buildNode(
 
   if (component.children?.template) {
     const template = component.children.template;
-    const items = resolveBoundValue(template.dataBinding, dataModel, context);
+    const binding = typeof template.dataBinding === "string" ? { path: template.dataBinding } : template.dataBinding;
+    const items = resolveBoundValue(binding, dataModel, context);
     if (Array.isArray(items)) {
       items.forEach((item, index) => {
         const templateComponent = components[template.componentId];

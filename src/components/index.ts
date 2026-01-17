@@ -10,3 +10,8 @@ export { A2uiRadioGroup } from "./RadioGroup.js";
 export { A2uiList } from "./List.js";
 export { A2uiTabs } from "./Tabs.js";
 export { A2uiTable } from "./Table.js";
+export { A2uiSlider } from "./Slider.js";
+export { A2uiDateTimeInput } from "./DateTimeInput.js";
+export { A2uiModal } from "./Modal.js";
+export { A2uiImage } from "./Image.js";
+export { A2uiDivider } from "./Divider.js";

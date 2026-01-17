@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Text } from "ink";
+import { Text } from "ink";
 import type { Key } from "ink";
 import type { ActionDef, ResolvedNode } from "../types.js";
 import type { CatalogRenderOptions } from "./types.js";
@@ -59,8 +59,8 @@ export const A2uiCheckbox: React.FC<{ node: ResolvedNode; options: CatalogRender
   const focusPrefix = isFocused ? "▶ " : "  ";
 
   return React.createElement(
-    Box,
-    { borderStyle: "single", borderColor: isFocused ? "cyan" : "gray", paddingX: 1 },
-    React.createElement(Text, { color: isFocused ? "cyan" : undefined, inverse: isFocused }, `${focusPrefix}${mark} ${label}`)
+    Text,
+    { color: isFocused ? "cyan" : undefined, inverse: isFocused },
+    `${focusPrefix}${mark} ${label}`
   );
 };

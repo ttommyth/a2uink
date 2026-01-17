@@ -9,7 +9,7 @@ export const A2uiList: React.FC<{ node: ResolvedNode }> = ({ node }) => {
 
   return React.createElement(
     Box,
-    { flexDirection: "column", borderStyle: "single", borderColor: "gray", paddingX: 1 },
+    { flexDirection: "column" },
     labels.map((label, index) => React.createElement(Text, { key: `${node.instanceKey}_${index}` }, `• ${label}`))
   );
 };

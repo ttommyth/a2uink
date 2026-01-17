@@ -14,13 +14,15 @@ export interface SurfaceUpdateMessage {
   type: "surfaceUpdate";
   surfaceId: string;
   rootComponentId: string;
-  components: ComponentDef[];
+  components: Array<ComponentDef | A2uiComponentInstance>;
 }
 
 export interface DataModelUpdateMessage {
   type: "dataModelUpdate";
   surfaceId: string;
-  dataModel: Record<string, unknown>;
+  dataModel?: Record<string, unknown>;
+  path?: string;
+  contents?: DataModelEntry[];
 }
 
 export interface DeleteSurfaceMessage {
@@ -53,12 +55,28 @@ export interface ComponentDef {
   children?: ChildrenDef;
 }
 
+export interface A2uiComponentInstance {
+  id: string;
+  component: Record<string, unknown>;
+}
+
 export interface ChildrenDef {
   explicitList?: string[];
   template?: {
     componentId: string;
-    dataBinding: BoundValue;
+    dataBinding: BoundValue | string;
   };
+}
+
+export interface DataModelEntry {
+  key: string;
+  valueString?: string;
+  valueNumber?: number;
+  valueBoolean?: boolean;
+  valueNull?: boolean;
+  valueMap?: DataModelEntry[];
+  valueArray?: Array<DataModelEntry | unknown>;
+  value?: unknown;
 }
 
 export type BoundValue = {

@@ -15,7 +15,7 @@ export const A2uiTable: React.FC<{ node: ResolvedNode }> = ({ node }) => {
 
   return React.createElement(
     Box,
-    { flexDirection: "column", borderStyle: "single", borderColor: "gray", paddingX: 1 },
+    { flexDirection: "column" },
     React.createElement(Text, { bold: true }, header),
     ...body.map((line, index) => React.createElement(Text, { key: `${node.instanceKey}_row_${index}` }, line))
   );

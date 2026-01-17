@@ -22,6 +22,12 @@ export function resolveBoundValue(
     if (resolved !== undefined) {
       return resolved;
     }
+    if (context?.item !== undefined) {
+      const fromItem = getPathValueFromRoot(boundValue.path, context.item);
+      if (fromItem !== undefined) {
+        return fromItem;
+      }
+    }
   }
 
   for (const key of literalKeys) {
@@ -66,7 +72,7 @@ function getPathValue(
   dataModel: Record<string, unknown>,
   context?: BindingContext
 ): unknown {
-  const normalized = path.replace(/^\$\.?/, "");
+  const normalized = normalizePath(path);
   if (normalized === "") {
     return dataModel;
   }
@@ -75,6 +81,19 @@ function getPathValue(
   const root = resolveContextRoot(parts[0], context, dataModel);
   const startIndex = root === dataModel ? 0 : 1;
 
+  return getPathValueFromParts(root, parts, startIndex);
+}
+
+function getPathValueFromRoot(path: string, root: unknown): unknown {
+  const normalized = normalizePath(path);
+  if (normalized === "") {
+    return root;
+  }
+  const parts = normalized.split(".");
+  return getPathValueFromParts(root, parts, 0);
+}
+
+function getPathValueFromParts(root: unknown, parts: string[], startIndex: number): unknown {
   let current: unknown = root;
   for (let i = startIndex; i < parts.length; i += 1) {
     if (current && typeof current === "object" && parts[i] in (current as Record<string, unknown>)) {
@@ -84,6 +103,24 @@ function getPathValue(
     }
   }
   return current;
+}
+
+function normalizePath(path: string): string {
+  const trimmed = path.trim();
+  if (!trimmed || trimmed === "/") {
+    return "";
+  }
+
+  const withoutPrefix = trimmed.replace(/^\$\.?/, "");
+  if (withoutPrefix.startsWith("/")) {
+    return withoutPrefix.replace(/^\/+/, "").replace(/\//g, ".");
+  }
+
+  if (withoutPrefix.includes("/")) {
+    return withoutPrefix.replace(/\//g, ".");
+  }
+
+  return withoutPrefix;
 }
 
 function resolveContextRoot(

@@ -65,7 +65,7 @@ export const A2uiRadioGroup: React.FC<{ node: ResolvedNode; options: CatalogRend
 
   return React.createElement(
     Box,
-    { flexDirection: "column", borderStyle: "single", borderColor: isFocused ? "cyan" : "gray", paddingX: 1 },
+    { flexDirection: "column" },
     labels.map((label, index) =>
       React.createElement(
         Text,

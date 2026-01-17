@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "ink": "^4.0.0",
+    "ink-divider": "^4.1.1",
     "react": "^18.2.0"
   },
   "devDependencies": {
