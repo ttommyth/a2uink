@@ -1,0 +1,47 @@
+{
+  "name": "a2ui-ink",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "node --loader ts-node/esm src/index.ts",
+    "demo": "node --loader ts-node/esm examples/demo.ts",
+    "prepare": "husky install",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "ink": "^4.0.0",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.41",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "husky": "^8.0.0",
+    "lint-staged": "^14.0.0",
+    "eslint": "^8.48.0",
+    "eslint-config-prettier": "^9.0.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "prettier": "^3.7.0"
+  }
+
+  ,"lint-staged": {
+    "*.{ts,tsx}": [
+      "npx --no-install eslint --fix",
+      "npx --no-install prettier --write",
+      "tsc -p tsconfig.json --noEmit"
+    ],
+    "*.{js,jsx}": [
+      "npx --no-install eslint --fix",
+      "npx --no-install prettier --write"
+    ],
+    "*.{md,json,css,scss,html}": [
+      "npx --no-install prettier --write"
+    ]
+  }
+}

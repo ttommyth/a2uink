@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Run tests if present; adjust as needed (lint-staged can be added later)
+npx --no-install lint-staged || true
+npm test --if-present
