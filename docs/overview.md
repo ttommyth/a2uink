@@ -14,7 +14,7 @@ You can pair it with any A2UI message source (agent, service, or MCP server). Th
 Below is a minimal example that connects a transport to the renderer. Replace the `receiveMessage` and `sendAction` functions with your MCP client or your own transport.
 
 ```ts
-import { createA2uiInkRenderer } from "a2ui-ink";
+import { createA2uiInkRenderer } from "a2uink";
 
 const renderer = createA2uiInkRenderer({
 	onUserAction: (action) => {

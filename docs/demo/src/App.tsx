@@ -662,7 +662,7 @@ export default function App() {
           <section id="installation" className={`section ${activeSection === "installation" ? "active" : ""}`}>
             <h2>Installation</h2>
             <div className="code-block">
-              <pre><code>npm install a2ui-ink</code></pre>
+              <pre><code>npm install a2uink</code></pre>
             </div>
 
             <h3>Peer Dependencies</h3>
@@ -679,7 +679,7 @@ export default function App() {
             <h2>Quick Start</h2>
             <p>Here&apos;s a minimal example to get you started:</p>
             <div className="code-block">
-              <pre><code>{`import { createA2uiInkRenderer } from "a2ui-ink";
+              <pre><code>{`import { createA2uiInkRenderer } from "a2uink";
 
 // 1. Create the renderer
 const renderer = createA2uiInkRenderer({
