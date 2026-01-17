@@ -8,7 +8,7 @@ Use npm run demo to launch the sample surface renderer.
 - A2UI v0.8 render gate: beginRendering, surfaceUpdate, dataModelUpdate
 - Adjacency-list tree reconstruction with explicit children and template lists
 - Data binding via `BoundValue` (path + literal fallbacks)
-- Ink-backed components: Text, Box, Spacer, Input, Select, Button
+- Ink-backed components: Text, Box, Spacer, Input, Select, Button, Checkbox, RadioGroup, List, Tabs, Table
 - Focus management with Tab / Shift+Tab navigation
 - Action dispatch: onPress, onChange, onSubmit, onSelect
 
@@ -19,6 +19,16 @@ Use npm run demo to launch the sample surface renderer.
 	- dataModelUpdate: initial state
 	- beginRendering: unlock rendering
 3. Handle `userAction` callbacks to round-trip input back to your A2UI server.
+
+## Usage with A2UI
+Create the renderer, stream A2UI messages into `handleMessage`, and forward user actions back to your server.
+
+Example flow:
+1. `surfaceUpdate` provides the component graph.
+2. `dataModelUpdate` supplies initial data.
+3. `beginRendering` allows the client to render.
+
+Use the `onUserAction` callback to capture input and selection events.
 
 Recommended entry points:
 - Public API: [src/index.ts](src/index.ts)
