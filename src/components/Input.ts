@@ -16,6 +16,7 @@ export const A2uiInput: React.FC<{ node: ResolvedNode; options: CatalogRenderOpt
   const nodeRef = useRef(node);
   const dispatchRef = useRef(options.dispatchAction);
   const handlerRef = useRef<(input: string, key: Key) => void>(() => undefined);
+  const [showCursor, setShowCursor] = useState(true);
 
   useEffect(() => {
     if (valueRef.current !== initial) {
@@ -71,10 +72,25 @@ export const A2uiInput: React.FC<{ node: ResolvedNode; options: CatalogRenderOpt
   }, [register, unregister, node.instanceKey]);
 
   const isFocused = focus.isFocused(node.instanceKey);
+  useEffect(() => {
+    if (!isFocused) {
+      setShowCursor(false);
+      return;
+    }
+    setShowCursor(true);
+    const interval = setInterval(() => {
+      setShowCursor((prev) => !prev);
+    }, 500);
+    return () => clearInterval(interval);
+  }, [isFocused]);
+
+  const displayValue = value || " ";
+  const cursor = isFocused && showCursor ? "▌" : " ";
+  const focusPrefix = isFocused ? "▶ " : "  ";
 
   return React.createElement(
     Box,
     { borderStyle: "single", borderColor: isFocused ? "cyan" : "gray", paddingX: 1 },
-    React.createElement(Text, { color: isFocused ? "cyan" : undefined }, value || " ")
+    React.createElement(Text, { color: isFocused ? "cyan" : undefined }, `${focusPrefix}${displayValue}${cursor}`)
   );
 };

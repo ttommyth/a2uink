@@ -11,6 +11,7 @@ export const A2uiButton: React.FC<{ node: ResolvedNode; options: CatalogRenderOp
   const label = (node.props.label ?? node.props.text ?? "Button") as string;
   const action = node.props.onPress as ActionDef | undefined;
   const isFocused = focus.isFocused(node.instanceKey);
+  const focusPrefix = isFocused ? "▶ " : "  ";
   const nodeRef = useRef(node);
   const dispatchRef = useRef(options.dispatchAction);
   const handlerRef = useRef<(input: string, key: Key) => void>(() => undefined);
@@ -43,6 +44,6 @@ export const A2uiButton: React.FC<{ node: ResolvedNode; options: CatalogRenderOp
   return React.createElement(
     Box,
     { borderStyle: "round", borderColor: isFocused ? "cyan" : "gray", paddingX: 1 },
-    React.createElement(Text, { inverse: isFocused, bold: true }, label)
+    React.createElement(Text, { inverse: isFocused, bold: true }, `${focusPrefix}${label}`)
   );
 };

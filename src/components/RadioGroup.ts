@@ -70,7 +70,7 @@ export const A2uiRadioGroup: React.FC<{ node: ResolvedNode; options: CatalogRend
       React.createElement(
         Text,
         { key: `${node.instanceKey}_${index}`, inverse: isFocused && index === selectedIndex },
-        `${index === selectedIndex ? "(o)" : "( )"} ${label}`
+        `${isFocused && index === selectedIndex ? "▶ " : "  "}${index === selectedIndex ? "(o)" : "( )"} ${label}`
       )
     )
   );

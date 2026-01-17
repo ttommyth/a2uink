@@ -42,6 +42,7 @@ export interface RendererOptions {
   stderr?: NodeJS.WriteStream;
   stdin?: NodeJS.ReadStream;
   exitOnCtrlC?: boolean;
+  patchConsole?: boolean;
   onUserAction?: (action: A2uiUserAction) => void;
 }
 

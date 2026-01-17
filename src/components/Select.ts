@@ -80,7 +80,7 @@ export const A2uiSelect: React.FC<{ node: ResolvedNode; options: CatalogRenderOp
       React.createElement(
         Text,
         { key: `${node.instanceKey}_${itemIndex}`, inverse: isFocused && itemIndex === index },
-        label
+        `${isFocused && itemIndex === index ? "▶ " : "  "}${label}`
       )
     )
   );

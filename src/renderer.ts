@@ -48,8 +48,10 @@ export function createA2uiInkRenderer(options: RendererOptions = {}): A2uiInkRen
     });
 
     if (!inkInstance) {
+      const canPatchConsole = typeof console !== "undefined" && typeof console.Console === "function";
       const renderOptions: Parameters<typeof render>[1] = {
-        exitOnCtrlC: options.exitOnCtrlC ?? true
+        exitOnCtrlC: options.exitOnCtrlC ?? true,
+        patchConsole: options.patchConsole ?? canPatchConsole
       };
 
       if (options.stdin) {

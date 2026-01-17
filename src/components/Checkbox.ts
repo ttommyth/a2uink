@@ -56,10 +56,11 @@ export const A2uiCheckbox: React.FC<{ node: ResolvedNode; options: CatalogRender
 
   const isFocused = focus.isFocused(node.instanceKey);
   const mark = checked ? "[x]" : "[ ]";
+  const focusPrefix = isFocused ? "▶ " : "  ";
 
   return React.createElement(
     Box,
     { borderStyle: "single", borderColor: isFocused ? "cyan" : "gray", paddingX: 1 },
-    React.createElement(Text, { inverse: isFocused }, `${mark} ${label}`)
+    React.createElement(Text, { color: isFocused ? "cyan" : undefined, inverse: isFocused }, `${focusPrefix}${mark} ${label}`)
   );
 };
