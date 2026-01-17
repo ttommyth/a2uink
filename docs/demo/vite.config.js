@@ -8,9 +8,13 @@ const shimRoot = fileURLToPath(new URL("./node_modules/vite-plugin-node-polyfill
 const localShims = fileURLToPath(new URL("./src/shims/", import.meta.url));
 const processShimPath = path.resolve(localShims, "process.js");
 const fsShimPath = path.resolve(localShims, "fs.js");
+const netShimPath = path.resolve(localShims, "net.js");
+const emptyShimPath = path.resolve(localShims, "empty.js");
 const bufferShimPath = path.resolve(shimRoot, "buffer/dist/index.js");
 const globalShimPath = path.resolve(shimRoot, "global/dist/index.js");
 const inkDividerPath = fileURLToPath(new URL("./node_modules/ink-divider/dist/index.js", import.meta.url));
+const streamBrowserifyPath = fileURLToPath(new URL("./node_modules/stream-browserify/index.js", import.meta.url));
+const webStreamsPath = fileURLToPath(new URL("./node_modules/web-streams-polyfill/dist/ponyfill.es2018.js", import.meta.url));
 const stdlibEmptyMatcher = /node-stdlib-browser[\\/]+esm[\\/]+mock[\\/]+empty\.js$/;
 const processShimMatcher = /^vite-plugin-node-polyfills\/shims\/process(?:\/.*)?$/;
 const processShimDistMatcher = /^vite-plugin-node-polyfills\/shims\/process\/dist\/index\.js$/;
@@ -26,8 +30,11 @@ const polyfillRedirect = {
     if (source === "node:fs" || source === "fs") {
       return fsShimPath;
     }
+    if (source === "node:net" || source === "net") {
+      return netShimPath;
+    }
     if (source === "node-stdlib-browser/esm/mock/empty.js" || source.includes("node-stdlib-browser/esm/mock/empty.js")) {
-      return fsShimPath;
+      return emptyShimPath;
     }
     if (
       source === "node_modules/vite-plugin-node-polyfills/shims/process/dist/index.js" ||
@@ -35,14 +42,23 @@ const polyfillRedirect = {
     ) {
       return processShimPath;
     }
+    if (source === "stream-browserify/web") {
+      return streamBrowserifyPath;
+    }
+    if (source === "node:stream/web" || source === "stream/web") {
+      return webStreamsPath;
+    }
     return null;
   },
   load(id) {
-    if (id.includes("node-stdlib-browser/esm/mock/empty.js")) {
-      return `export const existsSync = () => false;\nexport const readFileSync = () => \"\";\nexport default { existsSync, readFileSync };\n`;
-    }
     if (id.includes("vite-plugin-node-polyfills/shims/process/dist/index.js")) {
       return `import process from \"process\";\nif (!process.cwd) { process.cwd = () => \"/\"; }\nexport const cwd = () => process.cwd();\nexport const env = process.env;\nexport default process;\nexport { process };\n`;
+    }
+    if (id.includes("node-stdlib-browser/esm/mock/empty.js")) {
+      return `export const existsSync = () => false;\nexport const readFileSync = () => "";\nexport const isIP = () => 0;\nexport const isIPv4 = () => false;\nexport const isIPv6 = () => false;\nexport const statSync = () => ({ size: 0, mtimeMs: 0 });\nexport const createReadStream = () => ({ on: () => undefined });\nexport const promises = { stat: async () => ({ size: 0, mtimeMs: 0 }) };\nexport default { existsSync, readFileSync, isIP, isIPv4, isIPv6, statSync, createReadStream, promises };\n`;
+    }
+    if (id.endsWith("stream-browserify/web")) {
+      return `export * from "stream-browserify";\nexport { default } from "stream-browserify";\n`;
     }
     return null;
   }
@@ -63,6 +79,7 @@ export default defineConfig({
     target: "esnext"
   },
   resolve: {
+    dedupe: ["react", "react-dom"],
     alias: [
       {
         find: /^node:process$/,
@@ -77,12 +94,24 @@ export default defineConfig({
         replacement: fsShimPath
       },
       {
+        find: /^node:net$/,
+        replacement: netShimPath
+      },
+      {
         find: "node:fs",
         replacement: fsShimPath
       },
       {
+        find: "node:net",
+        replacement: netShimPath
+      },
+      {
         find: "fs",
         replacement: fsShimPath
+      },
+      {
+        find: "net",
+        replacement: netShimPath
       },
       {
         find: "vite-plugin-node-polyfills/shims/buffer",
@@ -106,11 +135,11 @@ export default defineConfig({
       },
       {
         find: stdlibEmptyMatcher,
-        replacement: fsShimPath
+        replacement: emptyShimPath
       },
       {
         find: "node-stdlib-browser/esm/mock/empty.js",
-        replacement: fsShimPath
+        replacement: emptyShimPath
       },
       {
         find: "node_modules/vite-plugin-node-polyfills/shims/process/dist/index.js",
@@ -119,6 +148,18 @@ export default defineConfig({
       {
         find: "ink-divider",
         replacement: inkDividerPath
+      },
+      {
+        find: "stream-browserify/web",
+        replacement: streamBrowserifyPath
+      },
+      {
+        find: /^node:stream\/web$/,
+        replacement: webStreamsPath
+      },
+      {
+        find: "stream/web",
+        replacement: webStreamsPath
       }
     ]
   },
@@ -142,8 +183,11 @@ export default defineConfig({
             build.onResolve({ filter: processShimDistMatcher }, () => ({ path: processShimPath }));
             build.onResolve({ filter: processShimDistPathMatcher }, () => ({ path: processShimPath }));
             build.onResolve({ filter: /^node:fs$/ }, () => ({ path: fsShimPath }));
-            build.onResolve({ filter: stdlibEmptyMatcher }, () => ({ path: fsShimPath }));
-            build.onResolve({ filter: /^node-stdlib-browser\/esm\/mock\/empty\.js$/ }, () => ({ path: fsShimPath }));
+            build.onResolve({ filter: /^node:net$/ }, () => ({ path: netShimPath }));
+            build.onResolve({ filter: /^node:stream\/web$/ }, () => ({ path: webStreamsPath }));
+            build.onResolve({ filter: /^stream\/web$/ }, () => ({ path: webStreamsPath }));
+            build.onResolve({ filter: stdlibEmptyMatcher }, () => ({ path: emptyShimPath }));
+            build.onResolve({ filter: /^node-stdlib-browser\/esm\/mock\/empty\.js$/ }, () => ({ path: emptyShimPath }));
             build.onResolve(
               { filter: /^node_modules\/vite-plugin-node-polyfills\/shims\/process\/dist\/index\.js$/ },
               () => ({ path: processShimPath })

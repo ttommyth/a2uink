@@ -13,7 +13,6 @@ import { A2uiList } from "./List.js";
 import { A2uiTabs } from "./Tabs.js";
 import { A2uiTable } from "./Table.js";
 import { A2uiSlider } from "./Slider.js";
-import { A2uiDateTimeInput } from "./DateTimeInput.js";
 import { A2uiModal } from "./Modal.js";
 import { A2uiImage } from "./Image.js";
 import { A2uiDivider } from "./Divider.js";
@@ -60,8 +59,6 @@ export function renderNode(node: ResolvedNode, options: Omit<CatalogRenderOption
       return React.createElement(A2uiDivider, { key: node.instanceKey, node });
     case "Slider":
       return React.createElement(A2uiSlider, { key: node.instanceKey, node, options: optionsWithRender });
-    case "DateTimeInput":
-      return React.createElement(A2uiDateTimeInput, { key: node.instanceKey, node, options: optionsWithRender });
     case "Modal":
       return React.createElement(
         A2uiModal,

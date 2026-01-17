@@ -511,20 +511,6 @@ function normalizeComponentShape(type: string, props: Record<string, unknown>) {
     };
   }
 
-  if (type === "DateTimeInput") {
-    return {
-      normalizedType: "DateTimeInput",
-      normalizedProps: {
-        label: nextProps.label,
-        value: nextProps.value ?? nextProps.text,
-        placeholder: nextProps.placeholder ?? resolveLiteralString(nextProps.label),
-        onChange: nextProps.onChange ?? normalizeAction(nextProps.action),
-        onSubmit: nextProps.onSubmit
-      },
-      children: undefined
-    };
-  }
-
   if (type === "Modal") {
     return {
       normalizedType: "Modal",

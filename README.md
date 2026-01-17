@@ -8,7 +8,7 @@ Use npm run demo to launch the sample surface renderer.
 - A2UI v0.8 render gate: beginRendering, surfaceUpdate, dataModelUpdate
 - Adjacency-list tree reconstruction with explicit children and template lists
 - Data binding via `BoundValue` (path + literal fallbacks)
-- Ink-backed components: Text, Box, Spacer, Input, Select, Button, Checkbox, RadioGroup, List, Tabs, Table
+- Ink-backed components: Text, Box, Spacer, Input, Select, Button, Checkbox, RadioGroup, List, Tabs, Table, Slider, Modal, Divider, Image, Chart
 - Focus management with Tab / Shift+Tab navigation
 - Action dispatch: onPress, onChange, onSubmit, onSelect
 

@@ -211,7 +211,6 @@ safeHandleMessage({
           "multipleChoice",
           "sliderLabel",
           "slider",
-          "dateTime",
           "mediaLabel",
           "image"
         ]
@@ -260,15 +259,6 @@ safeHandleMessage({
       props: { min: 1, max: 5, step: 1, value: { path: "form.priority" }, onChange: { actionId: "priorityChange" } }
     },
     {
-      id: "dateTime",
-      type: "DateTimeInput",
-      props: {
-        label: "Pickup",
-        value: { path: "form.pickupTime" },
-        onChange: { actionId: "pickupChange" }
-      }
-    },
-    {
       id: "mediaLabel",
       type: "Text",
       props: { text: "Media" }
@@ -298,7 +288,7 @@ safeHandleMessage({
   surfaceId,
   dataModel: {
     title: "A2UI Ink Demo",
-    form: { name: "", email: "", priority: 3, pickupTime: "2026-01-17 18:30" },
+    form: { name: "", email: "", priority: 3 },
     flags: { enabled: false },
     radioOptions: ["Low", "Medium", "High"],
     selectedRadio: 1,

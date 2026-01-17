@@ -30,7 +30,6 @@ const navSections = [
       { id: "checkbox", label: "Checkbox" },
       { id: "radiogroup", label: "RadioGroup" },
       { id: "slider", label: "Slider" },
-      { id: "datetime-input", label: "DateTimeInput" },
       { id: "list", label: "List" },
       { id: "tabs", label: "Tabs" },
       { id: "table", label: "Table" },
@@ -124,7 +123,6 @@ const exampleJson: DemoSurface = {
           "spacer3",
           "sliderLabel",
           "slider",
-          "dateInput",
           "imagePreview",
           "submit"
         ]
@@ -223,16 +221,6 @@ const exampleJson: DemoSurface = {
       props: { min: 1, max: 5, step: 1, value: { path: "form.priority" }, onChange: { actionId: "priorityChange" } }
     },
     {
-      id: "dateInput",
-      type: "DateTimeInput",
-      props: {
-        label: "Pickup time",
-        value: { path: "form.pickupTime" },
-        placeholder: "YYYY-MM-DD HH:MM",
-        onChange: { actionId: "pickupChange" }
-      }
-    },
-    {
       id: "imagePreview",
       type: "Image",
       props: { label: "Menu image", url: "https://example.com/menu.png" }
@@ -249,8 +237,7 @@ const exampleJson: DemoSurface = {
       name: "John Doe",
       email: "john@example.com",
       subscribe: true,
-      priority: 3,
-      pickupTime: "2026-01-17 18:30"
+      priority: 3
     },
     status: {
       columns: [
@@ -1139,42 +1126,6 @@ renderer.handleMessage({
             <div className="terminal-preview" data-component="slider">
               <div className="terminal-output">
                 <pre>██████░░░░░░░░░░░░░ 3</pre>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="datetime-input" className={`section ${activeSection === "datetime-input" ? "active" : ""}`}>
-          <h2>DateTimeInput</h2>
-          <p className="component-desc">Date/time text input for scheduling.</p>
-          <h3>Props</h3>
-          <table className="props-table">
-            <thead>
-              <tr><th>Prop</th><th>Type</th><th>Description</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><code>label</code></td><td>string</td><td>Field label</td></tr>
-              <tr><td><code>value</code></td><td>BoundValue</td><td>Current value</td></tr>
-              <tr><td><code>onChange</code></td><td>ActionDef</td><td>Action on change</td></tr>
-            </tbody>
-          </table>
-          <h3>Example</h3>
-          <div className="example-container">
-            <div className="code-block">
-              <pre><code>{`{
-  "id": "pickup",
-  "component": {
-    "DateTimeInput": {
-      "label": { "literalString": "Pickup" },
-      "text": { "path": "/form/pickupTime" }
-    }
-  }
-}`}</code></pre>
-            </div>
-            <div className="terminal-preview" data-component="datetime">
-              <div className="terminal-output">
-                <pre>Pickup
-2026-01-17 18:30│</pre>
               </div>
             </div>
           </div>
