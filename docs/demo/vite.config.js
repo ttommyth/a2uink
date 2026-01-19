@@ -79,7 +79,14 @@ export default defineConfig({
   build: {
     target: "esnext",
     commonjsOptions: {
-      include: [/node_modules/, /src/]
+      include: [/node_modules/, /src/],
+      transformMixedEsModules: true
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+        format: "es"
+      }
     }
   },
   resolve: {
