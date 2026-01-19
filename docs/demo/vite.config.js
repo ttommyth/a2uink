@@ -76,7 +76,10 @@ export default defineConfig({
     target: "esnext"
   },
   build: {
-    target: "esnext"
+    target: "esnext",
+    commonjsOptions: {
+      include: [/node_modules/, /src/]
+    }
   },
   resolve: {
     dedupe: ["react", "react-dom"],

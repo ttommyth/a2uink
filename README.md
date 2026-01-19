@@ -4,6 +4,8 @@ This library renders a minimal subset of A2UI components using Ink and React. It
 
 Use npm run demo to launch the sample surface renderer.
 
+🌐 **[View the interactive demo site](https://ttommyth.github.io/a2uink/)** - Browse components, test the JSON playground, and see examples in action.
+
 ## Supported Features
 - A2UI v0.8 render gate: beginRendering, surfaceUpdate, dataModelUpdate
 - Adjacency-list tree reconstruction with explicit children and template lists
