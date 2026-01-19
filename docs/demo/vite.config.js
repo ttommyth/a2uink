@@ -12,6 +12,7 @@ const netShimPath = path.resolve(localShims, "net.js");
 const emptyShimPath = path.resolve(localShims, "empty.js");
 const bufferShimPath = path.resolve(shimRoot, "buffer/dist/index.js");
 const globalShimPath = path.resolve(shimRoot, "global/dist/index.js");
+const inkPath = fileURLToPath(new URL("./node_modules/ink/build/index.js", import.meta.url));
 const inkDividerPath = fileURLToPath(new URL("./node_modules/ink-divider/dist/index.js", import.meta.url));
 const streamBrowserifyPath = fileURLToPath(new URL("./node_modules/stream-browserify/index.js", import.meta.url));
 const webStreamsPath = fileURLToPath(new URL("./node_modules/web-streams-polyfill/dist/ponyfill.es2018.js", import.meta.url));
@@ -79,9 +80,6 @@ export default defineConfig({
     target: "esnext",
     commonjsOptions: {
       include: [/node_modules/, /src/]
-    },
-    rollupOptions: {
-      external: ["ink", "ink-divider"]
     }
   },
   resolve: {
@@ -152,6 +150,10 @@ export default defineConfig({
         replacement: processShimPath
       },
       {
+        find: "ink",
+        replacement: inkPath
+      },
+      {
         find: "ink-divider",
         replacement: inkDividerPath
       },
@@ -176,7 +178,7 @@ export default defineConfig({
     hmr: false
   },
   optimizeDeps: {
-    include: ["buffer", "events", "stream-browserify"],
+    include: ["buffer", "events", "stream-browserify", "ink", "ink-divider"],
     exclude: ["yoga-wasm-web"],
     esbuildOptions: {
       target: "esnext",
