@@ -9,7 +9,7 @@ export const A2uiImage: React.FC<{ node: ResolvedNode }> = ({ node }) => {
   return React.createElement(
     Box,
     { flexDirection: "column" },
-    label ? React.createElement(Text, { dimColor: true }, label) : null,
+    label ? React.createElement(Text, { bold: true }, label) : null,
     React.createElement(Text, { color: "cyan" }, url ? `[Image] ${url}` : "[Image]")
   );
 };

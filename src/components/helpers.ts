@@ -5,7 +5,7 @@ export function getItemLabel(item: unknown): string {
 
   if (item && typeof item === "object") {
     const record = item as Record<string, unknown>;
-    const label = record.label ?? record.text ?? record.name;
+    const label = record.header ?? record.label ?? record.text ?? record.name ?? record.key;
     if (label) {
       return String(label);
     }

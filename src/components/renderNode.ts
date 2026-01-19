@@ -16,7 +16,7 @@ import { A2uiSlider } from "./Slider.js";
 import { A2uiModal } from "./Modal.js";
 import { A2uiImage } from "./Image.js";
 import { A2uiDivider } from "./Divider.js";
-import { Spacer } from "ink";
+import { A2uiSpacer } from "./Spacer.js";
 
 export function renderNode(node: ResolvedNode, options: Omit<CatalogRenderOptions, "renderNode">): React.ReactElement {
   const optionsWithRender: CatalogRenderOptions = {
@@ -34,7 +34,7 @@ export function renderNode(node: ResolvedNode, options: Omit<CatalogRenderOption
         node.children.map((child: ResolvedNode) => renderNode(child, options))
       );
     case "Spacer":
-      return React.createElement(Spacer, { key: node.instanceKey });
+      return React.createElement(A2uiSpacer, { key: node.instanceKey, node });
     case "Input":
       return React.createElement(A2uiInput, { key: node.instanceKey, node, options: optionsWithRender });
     case "TextField":

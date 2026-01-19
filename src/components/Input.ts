@@ -131,7 +131,7 @@ export const A2uiInput: React.FC<{ node: ResolvedNode; options: CatalogRenderOpt
   return React.createElement(
     Box,
     { flexDirection: "column" },
-    label ? React.createElement(Text, { dimColor: true }, label) : null,
+    label ? React.createElement(Text, { bold: true }, label) : null,
     React.createElement(Text, { color: isFocused ? "cyan" : undefined }, `${focusPrefix}${displayValue}${cursor}`)
   );
 };

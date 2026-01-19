@@ -14,3 +14,4 @@ export { A2uiSlider } from "./Slider.js";
 export { A2uiModal } from "./Modal.js";
 export { A2uiImage } from "./Image.js";
 export { A2uiDivider } from "./Divider.js";
+export { A2uiSpacer } from "./Spacer.js";

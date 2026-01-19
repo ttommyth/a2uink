@@ -78,15 +78,15 @@ export const A2uiSelect: React.FC<{ node: ResolvedNode; options: CatalogRenderOp
   return React.createElement(
     Box,
     { flexDirection: "column" },
-    label ? React.createElement(Text, { dimColor: true }, label) : null,
+    label ? React.createElement(Text, { bold: true }, label) : null,
     React.createElement(
       Box,
       { flexDirection: "column" },
       labels.map((itemLabel, itemIndex) =>
         React.createElement(
           Text,
-          { key: `${node.instanceKey}_${itemIndex}`, inverse: isFocused && itemIndex === index },
-          `${isFocused && itemIndex === index ? "▶ " : "  "}${itemLabel}`
+          { key: `${node.instanceKey}_${itemIndex}`, color: isFocused && itemIndex === index ? "cyan" : undefined },
+          `${itemIndex === index ? "▶ " : "  "}${itemLabel}`
         )
       )
     )

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Terminal } from "xterm";
+import { Terminal, type ITheme } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import { PassThrough } from "stream";
 import { createA2uiInkRenderer } from "../../../src/index.ts";
@@ -13,7 +13,8 @@ const navSections = [
     items: [
       { id: "overview", label: "Overview" },
       { id: "installation", label: "Installation" },
-      { id: "quick-start", label: "Quick Start" }
+      { id: "quick-start", label: "Quick Start" },
+      { id: "playground", label: "JSON Playground" }
     ]
   },
   {
@@ -36,10 +37,6 @@ const navSections = [
       { id: "modal", label: "Modal" },
       { id: "image", label: "Image" }
     ]
-  },
-  {
-    title: "Playground",
-    items: [{ id: "playground", label: "JSON Playground" }]
   }
 ] as const;
 
@@ -253,13 +250,474 @@ const exampleJson: DemoSurface = {
   }
 };
 
+const componentPreviewSurfaces: Record<string, DemoSurface> = {
+  text: {
+    surfaceId: "preview-text",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "Text",
+        props: {
+          text: { literalString: "Hello, World!" },
+          bold: true,
+          color: "green"
+        }
+      }
+    ]
+  },
+  box: {
+    surfaceId: "preview-box",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "Box",
+        props: {
+          direction: "column",
+          padding: 1,
+          borderStyle: "round"
+        },
+        children: { explicitList: ["child1", "child2"] }
+      },
+      {
+        id: "child1",
+        type: "Text",
+        props: { text: { literalString: "Child 1" } }
+      },
+      {
+        id: "child2",
+        type: "Text",
+        props: { text: { literalString: "Child 2" } }
+      }
+    ]
+  },
+  spacer: {
+    surfaceId: "preview-spacer",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "Box",
+        props: { direction: "column" },
+        children: { explicitList: ["above", "gap", "below"] }
+      },
+      {
+        id: "above",
+        type: "Text",
+        props: { text: { literalString: "Line above" } }
+      },
+      { id: "gap", type: "Spacer" },
+      {
+        id: "below",
+        type: "Text",
+        props: { text: { literalString: "Line below" } }
+      }
+    ]
+  },
+  button: {
+    surfaceId: "preview-button",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "Button",
+        props: { label: { literalString: "Submit" } }
+      }
+    ]
+  },
+  input: {
+    surfaceId: "preview-input",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "Input",
+        props: {
+          label: "Name",
+          value: { path: "form.name" },
+          onChange: { actionId: "nameChange" }
+        }
+      }
+    ],
+    dataModel: { form: { name: "John Doe" } }
+  },
+  textfield: {
+    surfaceId: "preview-textfield",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "TextField",
+        props: {
+          label: "Email",
+          value: { path: "form.email" }
+        }
+      }
+    ],
+    dataModel: { form: { email: "name@example.com" } }
+  },
+  select: {
+    surfaceId: "preview-select",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "Select",
+        props: {
+          label: "Color",
+          items: [{ label: "Red" }, { label: "Green" }, { label: "Blue" }],
+          selectedIndex: 0
+        }
+      }
+    ]
+  },
+  "multiple-choice": {
+    surfaceId: "preview-multiple-choice",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "MultipleChoice",
+        props: {
+          label: "Meal",
+          items: [{ label: "Pizza" }, { label: "Sushi" }],
+          selectedIndex: 0
+        }
+      }
+    ]
+  },
+  checkbox: {
+    surfaceId: "preview-checkbox",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "Checkbox",
+        props: {
+          label: "Enable notifications",
+          checked: true
+        }
+      }
+    ]
+  },
+  radiogroup: {
+    surfaceId: "preview-radiogroup",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "RadioGroup",
+        props: {
+          options: ["Small", "Medium", "Large"],
+          selectedIndex: 1
+        }
+      }
+    ]
+  },
+  slider: {
+    surfaceId: "preview-slider",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "Slider",
+        props: {
+          label: "Order priority",
+          min: 1,
+          max: 5,
+          step: 1,
+          value: 3
+        }
+      }
+    ]
+  },
+  list: {
+    surfaceId: "preview-list",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "List",
+        props: {
+          items: ["Buy groceries", "Walk the dog", "Write code"]
+        }
+      }
+    ]
+  },
+  tabs: {
+    surfaceId: "preview-tabs",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "Tabs",
+        props: {
+          tabs: ["Overview", "Settings", "Help"],
+          selectedIndex: 0
+        },
+        children: { explicitList: ["panel1", "panel2", "panel3"] }
+      },
+      {
+        id: "panel1",
+        type: "Text",
+        props: { text: { literalString: "Welcome to the overview panel!" } }
+      },
+      {
+        id: "panel2",
+        type: "Text",
+        props: { text: { literalString: "Update your settings here." } }
+      },
+      {
+        id: "panel3",
+        type: "Text",
+        props: { text: { literalString: "Need help? Contact support." } }
+      }
+    ]
+  },
+  table: {
+    surfaceId: "preview-table",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "Table",
+        props: {
+          columns: [{ label: "Service" }, { label: "Status" }],
+          rows: [
+            ["API", "OK"],
+            ["Database", "Warn"],
+            ["Cache", "OK"]
+          ]
+        }
+      }
+    ]
+  },
+  modal: {
+    surfaceId: "preview-modal",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "Modal",
+        props: {
+          title: "Order placed",
+          description: "Your order is on its way."
+        },
+        children: { explicitList: ["modalAction"] }
+      },
+      {
+        id: "modalAction",
+        type: "Button",
+        props: { label: { literalString: "Okay" } }
+      }
+    ]
+  },
+  image: {
+    surfaceId: "preview-image",
+    rootComponentId: "root",
+    components: [
+      {
+        id: "root",
+        type: "Image",
+        props: {
+          label: "Menu",
+          url: "https://example.com/menu.png"
+        }
+      }
+    ]
+  }
+};
+
+const terminalTheme = {
+  background: "#000000",
+  foreground: "#eaeaea",
+  cursor: "#00d9ff",
+  cursorAccent: "#000000",
+  selection: "rgba(0, 217, 255, 0.3)",
+  black: "#000000",
+  red: "#ff4757",
+  green: "#00ff88",
+  yellow: "#ffd700",
+  blue: "#00d9ff",
+  magenta: "#7b2cbf",
+  cyan: "#00d9ff",
+  white: "#eaeaea",
+  brightBlack: "#6c757d",
+  brightRed: "#ff6b81",
+  brightGreen: "#00ff88",
+  brightYellow: "#ffd700",
+  brightBlue: "#00d9ff",
+  brightMagenta: "#a855f7",
+  brightCyan: "#00d9ff",
+  brightWhite: "#ffffff"
+} as const;
+
+type TtyStream = PassThrough & {
+  isTTY: boolean;
+  columns: number;
+  rows: number;
+  ref: () => void;
+  unref: () => void;
+  hasColors: () => boolean;
+  getColorDepth: () => number;
+  setRawMode?: () => void;
+};
+
+const createTtyStream = (): TtyStream => {
+  const stream = new PassThrough() as TtyStream;
+  stream.isTTY = true;
+  stream.ref = () => {};
+  stream.unref = () => {};
+  stream.hasColors = () => true;
+  stream.getColorDepth = () => 24;
+  stream.columns = 0;
+  stream.rows = 0;
+  return stream;
+};
+
+const createPreviewTerminal = (container: HTMLDivElement) => {
+  const term = new Terminal({
+    theme: terminalTheme as unknown as ITheme,
+    fontFamily: '"Fira Code", "Consolas", monospace',
+    fontSize: 13,
+    lineHeight: 1.2,
+    cursorBlink: true,
+    cursorStyle: "bar",
+    scrollback: 1000,
+    convertEol: true
+  });
+
+  const fitAddon = new FitAddon();
+  term.loadAddon(fitAddon);
+  term.open(container);
+  fitAddon.fit();
+  requestAnimationFrame(() => fitAddon.fit());
+  term.focus();
+
+  term.attachCustomKeyEventHandler((event) => {
+    if (event.key === "Tab") {
+      event.preventDefault();
+    }
+    return true;
+  });
+
+  container.addEventListener("mousedown", () => term.focus());
+
+  const stdout = createTtyStream();
+  const stderr = createTtyStream();
+  const stdin = createTtyStream();
+
+  stdout.columns = term.cols;
+  stdout.rows = term.rows;
+  stderr.columns = term.cols;
+  stderr.rows = term.rows;
+
+  stdin.setRawMode = () => {};
+  stdin.resume = () => stdin;
+  stdin.pause = () => stdin;
+
+  stdout.on("data", (chunk: Buffer) => {
+    term.write(chunk.toString());
+  });
+
+  stderr.on("data", (chunk: Buffer) => {
+    term.write(`\x1b[31m${chunk.toString()}\x1b[0m`);
+  });
+
+  term.onData((data) => {
+    stdin.write(data);
+  });
+
+  term.onResize(({ cols, rows }) => {
+    stdout.columns = cols;
+    stdout.rows = rows;
+    stderr.columns = cols;
+    stderr.rows = rows;
+    stdout.emit("resize");
+    stderr.emit("resize");
+    stdin.emit("resize");
+    fitAddon.fit();
+  });
+
+  return { term, fitAddon, stdout, stderr, stdin };
+};
+
+const InkPreview: React.FC<{ surface: DemoSurface }> = ({ surface }) => {
+  const previewRef = useRef<HTMLDivElement | null>(null);
+  const terminalRef = useRef<Terminal | null>(null);
+  const fitAddonRef = useRef<FitAddon | null>(null);
+  const rendererRef = useRef<ReturnType<typeof createA2uiInkRenderer> | null>(null);
+
+  useEffect(() => {
+    if (!previewRef.current || terminalRef.current) {
+      return;
+    }
+
+    const { term, fitAddon, stdout, stderr, stdin } = createPreviewTerminal(previewRef.current);
+    terminalRef.current = term;
+    fitAddonRef.current = fitAddon;
+
+    rendererRef.current = createA2uiInkRenderer({
+      stdout: stdout as unknown as NodeJS.WriteStream,
+      stderr: stderr as unknown as NodeJS.WriteStream,
+      stdin: stdin as unknown as NodeJS.ReadStream,
+      exitOnCtrlC: false,
+      patchConsole: false
+    });
+
+    const handleResize = () => fitAddon.fit();
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      rendererRef.current?.dispose?.();
+      rendererRef.current = null;
+      term.dispose();
+      terminalRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!rendererRef.current || !terminalRef.current) {
+      return;
+    }
+
+    const surfaceId = surface.surfaceId || "preview";
+    terminalRef.current.clear();
+
+    rendererRef.current.handleMessage({
+      type: "surfaceUpdate",
+      surfaceId,
+      rootComponentId: surface.rootComponentId || "root",
+      components: (surface.components ?? []) as ComponentDef[]
+    });
+
+    rendererRef.current.handleMessage({
+      type: "dataModelUpdate",
+      surfaceId,
+      dataModel: surface.dataModel || {}
+    });
+
+    rendererRef.current.handleMessage({
+      type: "beginRendering",
+      surfaceId,
+      catalogId: surface.catalogId
+    });
+
+    fitAddonRef.current?.fit();
+  }, [surface]);
+
+  return <div ref={previewRef} className="terminal-simulator" />;
+};
+
 const SIMPLE_SURFACE_ID = "demo";
 const SIMPLE_ROOT_ID = "root";
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState<string>("overview");
+  const [activeSection, setActiveSection] = useState<string>("playground");
   const [jsonText, setJsonText] = useState<string>(() => JSON.stringify(defaultJson, null, 2));
-  const [inputMode, setInputMode] = useState<"full" | "simple">("full");
+  const [inputMode, setInputMode] = useState<"full" | "simple">("simple");
   const [componentsText, setComponentsText] = useState<string>(
     () => JSON.stringify(defaultJson.components ?? [], null, 2)
   );
@@ -294,6 +752,8 @@ export default function App() {
       const sectionId = window.location.hash.replace("#", "");
       if (sectionId) {
         setActiveSection(sectionId);
+      } else {
+        setActiveSection("playground");
       }
     };
 
@@ -308,29 +768,7 @@ export default function App() {
     }
 
     const term = new Terminal({
-      theme: {
-        background: "#000000",
-        foreground: "#eaeaea",
-        cursor: "#00d9ff",
-        cursorAccent: "#000000",
-        selection: "rgba(0, 217, 255, 0.3)",
-        black: "#000000",
-        red: "#ff4757",
-        green: "#00ff88",
-        yellow: "#ffd700",
-        blue: "#00d9ff",
-        magenta: "#7b2cbf",
-        cyan: "#00d9ff",
-        white: "#eaeaea",
-        brightBlack: "#6c757d",
-        brightRed: "#ff6b81",
-        brightGreen: "#00ff88",
-        brightYellow: "#ffd700",
-        brightBlue: "#00d9ff",
-        brightMagenta: "#a855f7",
-        brightCyan: "#00d9ff",
-        brightWhite: "#ffffff"
-      },
+      theme: terminalTheme as unknown as ITheme,
       fontFamily: '"Fira Code", "Consolas", monospace',
       fontSize: 14,
       lineHeight: 1.2,
@@ -344,6 +782,7 @@ export default function App() {
     term.loadAddon(fitAddon);
     term.open(terminalRef.current);
     fitAddon.fit();
+    requestAnimationFrame(() => fitAddon.fit());
     fitAddonRef.current = fitAddon;
     term.focus();
     termInstanceRef.current = term;
@@ -355,31 +794,15 @@ export default function App() {
       return true;
     });
 
-    const stdout = new PassThrough();
-    const stderr = new PassThrough();
-    const stdin = new PassThrough();
+    const stdout = createTtyStream();
+    const stderr = createTtyStream();
+    const stdin = createTtyStream();
 
-    process.stdout = stdout as unknown as NodeJS.WriteStream;
-    process.stderr = stderr as unknown as NodeJS.WriteStream;
-    process.stdin = stdin as unknown as NodeJS.ReadStream;
+    process.stdout = stdout as unknown as NodeJS.WriteStream & { fd: 1 };
+    process.stderr = stderr as unknown as NodeJS.WriteStream & { fd: 2 };
+    process.stdin = stdin as unknown as NodeJS.ReadStream & { fd: 0 };
     process.env = process.env || {};
     process.env.TERM = process.env.TERM || "xterm-256color";
-
-    stdout.isTTY = true;
-    stderr.isTTY = true;
-    stdin.isTTY = true;
-
-    stdout.ref = () => {};
-    stdout.unref = () => {};
-    stderr.ref = () => {};
-    stderr.unref = () => {};
-    stdin.ref = () => {};
-    stdin.unref = () => {};
-
-    stdout.hasColors = () => true;
-    stderr.hasColors = () => true;
-    stdout.getColorDepth = () => 24;
-    stderr.getColorDepth = () => 24;
 
     stdout.columns = term.cols;
     stdout.rows = term.rows;
@@ -387,8 +810,8 @@ export default function App() {
     stderr.rows = term.rows;
 
     stdin.setRawMode = () => {};
-    stdin.resume = () => {};
-    stdin.pause = () => {};
+    stdin.resume = () => stdin;
+    stdin.pause = () => stdin;
 
     stdout.on("data", (chunk: Buffer) => {
       term.write(chunk.toString());
@@ -729,6 +1152,102 @@ renderer.handleMessage({
             </div>
           </section>
 
+          <section id="playground" className={`section ${activeSection === "playground" ? "active" : ""}`}>
+            <h2>JSON Playground</h2>
+            <p className="lead">Paste your A2UI JSON to preview how it renders in the terminal.</p>
+            <p className="component-desc">Simple Mode accepts a components array and a dataModel object. It uses surface ID <code>demo</code> and root ID <code>root</code>.</p>
+
+            <div className="playground-container">
+              <div className="playground-editor">
+                <div className="editor-header">
+                  <span>A2UI JSON</span>
+                  <div className="editor-actions">
+                    <div className="editor-mode">
+                      <button
+                        type="button"
+                        className={`btn btn-secondary btn-sm ${inputMode === "full" ? "is-active" : ""}`}
+                        onClick={() => setInputMode("full")}
+                      >
+                        Full JSON
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn btn-secondary btn-sm ${inputMode === "simple" ? "is-active" : ""}`}
+                        onClick={() => setInputMode("simple")}
+                      >
+                        Simple Mode
+                      </button>
+                    </div>
+                    <button type="button" className="btn btn-secondary" onClick={handleLoadExample}>Load Example</button>
+                    <button type="button" className="btn btn-primary" onClick={handleRender}>Render</button>
+                  </div>
+                </div>
+                {inputMode === "full" ? (
+                  <textarea
+                    id="jsonEditor"
+                    className="editor-textarea"
+                    spellCheck={false}
+                    value={jsonText}
+                    onChange={(event) => setJsonText(event.target.value)}
+                  />
+                ) : (
+                  <div className="simple-editor-grid">
+                    <label className="editor-field">
+                      <span>Components (array)</span>
+                      <textarea
+                        className="editor-textarea"
+                        spellCheck={false}
+                        value={componentsText}
+                        onChange={(event) => setComponentsText(event.target.value)}
+                      />
+                    </label>
+                    <label className="editor-field">
+                      <span>dataModel (object)</span>
+                      <textarea
+                        className="editor-textarea"
+                        spellCheck={false}
+                        value={dataModelText}
+                        onChange={(event) => setDataModelText(event.target.value)}
+                      />
+                    </label>
+                  </div>
+                )}
+              </div>
+
+              <div className="playground-preview">
+                <div className="preview-header">
+                  <span>Terminal Preview</span>
+                  <div className="preview-actions">
+                    <button type="button" className="btn btn-secondary btn-sm" onClick={handleClearTerminal}>Clear</button>
+                  </div>
+                </div>
+                <div ref={terminalRef} id="terminal" className="terminal-container" />
+                <div className="terminal-help">
+                  <strong>Ink interactivity:</strong>
+                  <code>Tab</code> / <code>Shift+Tab</code> to move focus, <code>Enter</code> or <code>Space</code> to activate,
+                  type directly in inputs.
+                </div>
+              </div>
+            </div>
+
+            <div className="playground-actions">
+              <h3>User Actions Log</h3>
+              <div id="actionsLog" className="actions-log">
+                {actions.length === 0 ? (
+                  <p className="placeholder">User actions will appear here when you interact with components...</p>
+                ) : (
+                  actions.map((action, index) => (
+                    <div className="action-entry" key={`${action.componentId}-${action.actionId}-${index}`}>
+                      <span className="action-type">{action.type}</span> →
+                      <span className="action-component">{action.componentId}</span>
+                      {Object.keys(action).length ? <code>{JSON.stringify(action)}</code> : null}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </section>
+
         <section id="text" className={`section ${activeSection === "text" ? "active" : ""}`}>
           <h2>Text</h2>
           <p className="component-desc">Renders styled text content. Supports bold, italic, underline, strikethrough, and color styling.</p>
@@ -760,9 +1279,7 @@ renderer.handleMessage({
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="text">
-              <div className="terminal-output">
-                <span className="term-bold term-green">Hello, World!</span>
-              </div>
+              <InkPreview surface={componentPreviewSurfaces.text} />
             </div>
           </div>
         </section>
@@ -801,9 +1318,7 @@ renderer.handleMessage({
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="box">
-              <div className="terminal-output">
-                <pre>{"╭─────────────────────╮\n│ Child 1             │\n│ Child 2             │\n╰─────────────────────╯"}</pre>
-              </div>
+              <InkPreview surface={componentPreviewSurfaces.box} />
             </div>
           </div>
         </section>
@@ -829,9 +1344,7 @@ renderer.handleMessage({
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="spacer">
-              <div className="terminal-output">
-                <pre>{"Line above\n\nLine below"}</pre>
-              </div>
+              <InkPreview surface={componentPreviewSurfaces.spacer} />
             </div>
           </div>
         </section>
@@ -863,9 +1376,7 @@ renderer.handleMessage({
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="button">
-              <div className="terminal-output">
-                <span className="term-button">[ Submit ]</span>
-              </div>
+              <InkPreview surface={componentPreviewSurfaces.button} />
             </div>
           </div>
         </section>
@@ -900,9 +1411,7 @@ renderer.handleMessage({
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="input">
-              <div className="terminal-output">
-                <span className="term-input">John Doe<span className="cursor">│</span></span>
-              </div>
+              <InkPreview surface={componentPreviewSurfaces.input} />
             </div>
           </div>
         </section>
@@ -936,10 +1445,7 @@ renderer.handleMessage({
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="textfield">
-              <div className="terminal-output">
-                <span className="term-label">Email</span>
-                <span className="term-input">name@example.com<span className="cursor">│</span></span>
-              </div>
+              <InkPreview surface={componentPreviewSurfaces.textfield} />
             </div>
           </div>
         </section>
@@ -972,11 +1478,7 @@ renderer.handleMessage({
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="select">
-              <div className="terminal-output">
-                <pre>▶ Red
-  Green
-  Blue</pre>
-              </div>
+              <InkPreview surface={componentPreviewSurfaces.select} />
             </div>
           </div>
         </section>
@@ -1012,10 +1514,7 @@ renderer.handleMessage({
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="multiple-choice">
-              <div className="terminal-output">
-                <pre>▶ Pizza
-  Sushi</pre>
-              </div>
+              <InkPreview surface={componentPreviewSurfaces["multiple-choice"]} />
             </div>
           </div>
         </section>
@@ -1048,9 +1547,7 @@ renderer.handleMessage({
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="checkbox">
-              <div className="terminal-output">
-                <span className="term-green">[x]</span> Enable notifications
-              </div>
+              <InkPreview surface={componentPreviewSurfaces.checkbox} />
             </div>
           </div>
         </section>
@@ -1083,11 +1580,7 @@ renderer.handleMessage({
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="radiogroup">
-              <div className="terminal-output">
-                <pre>  ( ) Small
-▶ (o) Medium
-  ( ) Large</pre>
-              </div>
+              <InkPreview surface={componentPreviewSurfaces.radiogroup} />
             </div>
           </div>
         </section>
@@ -1124,9 +1617,7 @@ renderer.handleMessage({
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="slider">
-              <div className="terminal-output">
-                <pre>██████░░░░░░░░░░░░░ 3</pre>
-              </div>
+              <InkPreview surface={componentPreviewSurfaces.slider} />
             </div>
           </div>
         </section>
@@ -1155,9 +1646,7 @@ renderer.handleMessage({
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="list">
-              <div className="terminal-output">
-                <pre>{"• Buy groceries\n• Walk the dog\n• Write code"}</pre>
-              </div>
+              <InkPreview surface={componentPreviewSurfaces.list} />
             </div>
           </div>
         </section>
@@ -1193,12 +1682,7 @@ renderer.handleMessage({
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="tabs">
-              <div className="terminal-output">
-                <pre>
-                  <span className="term-cyan">Overview</span>
-                  {"  Settings  Help\nWelcome to the overview panel!"}
-                </pre>
-              </div>
+              <InkPreview surface={componentPreviewSurfaces.tabs} />
             </div>
           </div>
         </section>
@@ -1229,16 +1713,7 @@ renderer.handleMessage({
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="table">
-              <div className="terminal-output">
-                <pre>
-                  {"Name      Status\nAPI       "}
-                  <span className="term-green">OK</span>
-                  {"\nDatabase  "}
-                  <span className="term-yellow">Warn</span>
-                  {"\nCache     "}
-                  <span className="term-green">OK</span>
-                </pre>
-              </div>
+              <InkPreview surface={componentPreviewSurfaces.table} />
             </div>
           </div>
         </section>
@@ -1270,10 +1745,7 @@ renderer.handleMessage({
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="modal">
-              <div className="terminal-output">
-                <pre>Order placed
-Your order is on its way.</pre>
-              </div>
+              <InkPreview surface={componentPreviewSurfaces.modal} />
             </div>
           </div>
         </section>
@@ -1294,108 +1766,11 @@ Your order is on its way.</pre>
 }`}</code></pre>
             </div>
             <div className="terminal-preview" data-component="image">
-              <div className="terminal-output">
-                <pre>[Image] https://example.com/menu.png</pre>
-              </div>
+              <InkPreview surface={componentPreviewSurfaces.image} />
             </div>
           </div>
         </section>
 
-        <section id="playground" className={`section ${activeSection === "playground" ? "active" : ""}`}>
-          <h2>JSON Playground</h2>
-          <p className="lead">Paste your A2UI JSON to preview how it renders in the terminal.</p>
-          <p className="component-desc">Simple Mode accepts a components array and a dataModel object. It uses surface ID <code>demo</code> and root ID <code>root</code>.</p>
-
-          <div className="playground-container">
-            <div className="playground-editor">
-              <div className="editor-header">
-                <span>A2UI JSON</span>
-                <div className="editor-actions">
-                  <div className="editor-mode">
-                    <button
-                      type="button"
-                      className={`btn btn-secondary btn-sm ${inputMode === "full" ? "is-active" : ""}`}
-                      onClick={() => setInputMode("full")}
-                    >
-                      Full JSON
-                    </button>
-                    <button
-                      type="button"
-                      className={`btn btn-secondary btn-sm ${inputMode === "simple" ? "is-active" : ""}`}
-                      onClick={() => setInputMode("simple")}
-                    >
-                      Simple Mode
-                    </button>
-                  </div>
-                  <button type="button" className="btn btn-secondary" onClick={handleLoadExample}>Load Example</button>
-                  <button type="button" className="btn btn-primary" onClick={handleRender}>Render</button>
-                </div>
-              </div>
-              {inputMode === "full" ? (
-                <textarea
-                  id="jsonEditor"
-                  className="editor-textarea"
-                  spellCheck={false}
-                  value={jsonText}
-                  onChange={(event) => setJsonText(event.target.value)}
-                />
-              ) : (
-                <div className="simple-editor-grid">
-                  <label className="editor-field">
-                    <span>Components (array)</span>
-                    <textarea
-                      className="editor-textarea"
-                      spellCheck={false}
-                      value={componentsText}
-                      onChange={(event) => setComponentsText(event.target.value)}
-                    />
-                  </label>
-                  <label className="editor-field">
-                    <span>dataModel (object)</span>
-                    <textarea
-                      className="editor-textarea"
-                      spellCheck={false}
-                      value={dataModelText}
-                      onChange={(event) => setDataModelText(event.target.value)}
-                    />
-                  </label>
-                </div>
-              )}
-            </div>
-
-            <div className="playground-preview">
-              <div className="preview-header">
-                <span>Terminal Preview</span>
-                <div className="preview-actions">
-                  <button type="button" className="btn btn-secondary btn-sm" onClick={handleClearTerminal}>Clear</button>
-                </div>
-              </div>
-              <div ref={terminalRef} id="terminal" className="terminal-container" />
-              <div className="terminal-help">
-                <strong>Ink interactivity:</strong>
-                <code>Tab</code> / <code>Shift+Tab</code> to move focus, <code>Enter</code> or <code>Space</code> to activate,
-                type directly in inputs.
-              </div>
-            </div>
-          </div>
-
-          <div className="playground-actions">
-            <h3>User Actions Log</h3>
-            <div id="actionsLog" className="actions-log">
-              {actions.length === 0 ? (
-                <p className="placeholder">User actions will appear here when you interact with components...</p>
-              ) : (
-                actions.map((action, index) => (
-                  <div className="action-entry" key={`${action.componentId}-${action.actionId}-${index}`}>
-                    <span className="action-type">{action.type}</span> →
-                    <span className="action-component">{action.componentId}</span>
-                    {Object.keys(action).length ? <code>{JSON.stringify(action)}</code> : null}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </section>
         </div>
       </main>
     </div>
