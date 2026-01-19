@@ -28,6 +28,9 @@ const polyfillRedirect = {
     if (source === "node:process" || source === "node:process") {
       return processShimPath;
     }
+    if (source === "process") {
+      return processShimPath;
+    }
     if (source === "node:fs" || source === "fs") {
       return fsShimPath;
     }
@@ -53,7 +56,7 @@ const polyfillRedirect = {
   },
   load(id) {
     if (id.includes("vite-plugin-node-polyfills/shims/process/dist/index.js")) {
-      return `import process from \"process\";\nif (!process.cwd) { process.cwd = () => \"/\"; }\nexport const cwd = () => process.cwd();\nexport const env = process.env;\nexport default process;\nexport { process };\n`;
+      return `const shimProcess = globalThis.process ?? {};\nif (!shimProcess.env) { shimProcess.env = {}; }\nif (!shimProcess.cwd) { shimProcess.cwd = () => \"/\"; }\nexport const cwd = () => shimProcess.cwd();\nexport const env = shimProcess.env;\nexport default shimProcess;\n`;
     }
     if (id.includes("node-stdlib-browser/esm/mock/empty.js")) {
       return `export const existsSync = () => false;\nexport const readFileSync = () => "";\nexport const isIP = () => 0;\nexport const isIPv4 = () => false;\nexport const isIPv6 = () => false;\nexport const statSync = () => ({ size: 0, mtimeMs: 0 });\nexport const createReadStream = () => ({ on: () => undefined });\nexport const promises = { stat: async () => ({ size: 0, mtimeMs: 0 }) };\nexport default { existsSync, readFileSync, isIP, isIPv4, isIPv6, statSync, createReadStream, promises };\n`;
@@ -98,6 +101,14 @@ export default defineConfig({
       },
       {
         find: "node:process",
+        replacement: processShimPath
+      },
+      {
+        find: /^process$/,
+        replacement: processShimPath
+      },
+      {
+        find: "process",
         replacement: processShimPath
       },
       {
@@ -194,6 +205,7 @@ export default defineConfig({
           name: "process-shim-resolver",
           setup(build) {
             build.onResolve({ filter: /^node:process$/ }, () => ({ path: processShimPath }));
+            build.onResolve({ filter: /^process$/ }, () => ({ path: processShimPath }));
             build.onResolve({ filter: processShimMatcher }, () => ({ path: processShimPath }));
             build.onResolve({ filter: processShimDistMatcher }, () => ({ path: processShimPath }));
             build.onResolve({ filter: processShimDistPathMatcher }, () => ({ path: processShimPath }));
