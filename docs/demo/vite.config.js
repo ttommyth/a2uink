@@ -79,6 +79,9 @@ export default defineConfig({
     target: "esnext",
     commonjsOptions: {
       include: [/node_modules/, /src/]
+    },
+    rollupOptions: {
+      external: ["ink", "ink-divider"]
     }
   },
   resolve: {
